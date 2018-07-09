@@ -1,0 +1,28 @@
+﻿@using TechDigest.Web.Models;
+@model IEnumerable<Week>
+
+@{ 
+    tdigestdbEntities db = new tdigestdbEntities();
+    IEnumerable<Week> list = from n in db.Weeks orderby n.Id descending select n;
+}
+
+<div class="row" style="margin-top: 20px">
+    @{
+        int i = 1;
+        foreach (Week w in list) {
+            <div class="col-xs-12 col-sm-6 col-md-4" style="padding: 0px 8px 0px 8px">
+                <div class="news-box">
+                    <a href=" @Url.Action("Week/" + w.Id)">
+                        <img src="@w.Image" class="img-responsive" style="margin-top: 5px" />
+                    </a>
+                    <h4 style="font-size:25px">@w.Title</h4>
+                    <p>@w.Body</p>
+                </div>
+            </div>
+            if (i % 3 == 0) {
+                <div class="clearfix"></div>
+            }
+            i++;
+        }
+    }
+</div>

@@ -1,0 +1,94 @@
+﻿@using TechDigest.Web.Models;
+@model IEnumerable<News>
+
+@{
+    tdigestdbEntities db = new tdigestdbEntities();
+    News intro = Model.Single(n => n.Category == 0);
+    News top1 = Model.Single(n => n.Category == 1);
+    News top2 = Model.Single(n => n.Category == 2);
+    News top3 = Model.Single(n => n.Category == 3);
+    IEnumerable<News> list4 = Model.Where(n => n.Category == 4 || n.Category == 5);
+    IEnumerable<News> list6 = Model.Where(n => n.Category == 6);
+    IEnumerable<News> list7 = Model.Where(n => n.Category == 7);
+    IEnumerable<News> list8 = Model.Where(n => n.Category == 8);
+    IEnumerable<News> list9 = Model.Where(n => n.Category == 9);
+}
+
+    <ul class="nav nav-tabs nav-justified" style="margin-top:20px">
+        <li class="active"><a data-toggle="tab" href="#intro"><div class="tabs">Intro + Top 3</div></a></li>
+        @if (list4.Count() != 0) {<li><a data-toggle="tab" href="#oem"><div class="tabs">OEMs</div></a></li>}
+        @if (list6.Count() != 0) {<li><a data-toggle="tab" href="#microsoft"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/800px-Microsoft_logo_%282012%29.svg.png" style="height:20px"/></a></li>}
+        @if (list7.Count() != 0) {<li><a data-toggle="tab" href="#apple"><img src="http://orig14.deviantart.net/ce1c/f/2016/186/f/9/_late_gift_black_apple_logo_vector_by_windows7starterfan-da8vka6.png" style="height:20px" /></a></li>}
+        @if (list8.Count() != 0) {<li><a data-toggle="tab" href="#google"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png" style="height:18px" /></a></li>}
+        @if (list9.Count() != 0) {<li><a data-toggle="tab" href="#other"><div class="tabs">Other</div></a></li>}
+    </ul>
+<div class="row">
+
+    <div class="tab-content">
+        <div id="intro" class="tab-pane fade in active" style="margin-top:10px">
+            <div class="col-xs-12" style="margin: 5px 10px 5px 10px"><p>@Html.Raw(intro.Body)</p></div>
+            @generateTopBlocks(top1)
+            @generateTopBlocks(top2)
+            @generateTopBlocks(top3)
+        </div>
+        <div id="oem" class="tab-pane fade" style="margin-top:20px">@generateNewsBlock(list4)</div>
+        <div id="microsoft" class="tab-pane fade" style="margin-top:20px">@generateNewsBlock(list6)</div>
+        <div id="apple" class="tab-pane fade" style="margin-top:20px">@generateNewsBlock(list7)</div>
+        <div id="google" class="tab-pane fade" style="margin-top:20px">@generateNewsBlock(list8)</div>
+        <div id="other" class="tab-pane fade" style="margin-top:20px">@generateNewsBlock(list9)</div>
+    </div>
+
+</div>
+
+
+@helper generateTopBlocks(News top) {
+    <div class="col-xs-12 col-sm-6 col-md-4" style="padding: 0px 8px 0px 8px">
+        <div class="news-box">
+            <div class="contain">
+                <img src="@top.Image" class="image img-responsive" />
+                <div class="middle">@getReferrals(top.Id)</div>
+            </div>
+            <h4 style="margin: 5px 0px 0px 0px">@top.Title</h4>
+            <p style="margin: 5px 0px 0px 0px">@Html.Raw(top.Body)</p>
+        </div>
+    </div>
+}
+
+@helper generateNewsBlock(IEnumerable<News> list) {
+foreach (News w in list) {
+        <div class="msnry-tester col-xs-12 col-sm-6 col-md-4" style="padding: 0px 13px 0px 13px">
+            <div class="news-box">
+                <div class="contain">
+                    <img src="@w.Image" class="image img-responsive" />
+                    <div class="middle">@getReferrals(w.Id)</div>
+                </div>
+                <h4 style="margin: 5px 0px 0px 0px">@w.Title</h4>
+                <p style="margin: 5px 0px 0px 0px">@w.Body</p>
+            </div>
+        </div>
+    }    
+}
+
+@helper getReferrals(int NewsId) { 
+    tdigestdbEntities db = new tdigestdbEntities();
+    IEnumerable<Referral> referralsList = from n in db.Referrals where n.NewsId == NewsId select n;
+    string testPopover = "";
+    foreach (Referral r in referralsList) {
+        testPopover += "<a class=\"btn btn-default\" style=\"margin-right:3px; margin-top:1px\" href=\"" + r.URL + "\" target=\"_blank\">" + r.Name + "</a>";
+    }
+    @Html.Raw(testPopover);
+}
+
+@section scripts{
+    <script>
+        function updateMasonry() {
+            $('.tab-pane.active').masonry({
+                itemSelector: '.msnry-tester',
+                gutter: 0
+            })
+        }
+
+        $('a[data-toggle="tab"]').on('shown.bs.tab', updateMasonry);
+        $(window).on('resize load', updateMasonry);
+    </script>
+}
